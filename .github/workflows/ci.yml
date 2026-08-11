@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Deliberately does not deploy. Deploying needs Cloudflare credentials and a
+# Paid plan, and a fork's PR must never be able to touch the maintainer's
+# Worker. CI proves the code compiles and the pure logic behaves.
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # Not --ignore-scripts: esbuild and workerd fetch platform binaries in
+      # their install step, and the build needs them.
+      - run: npm ci
+
+      - name: Typecheck Worker and UI
+        run: npm run typecheck
+
+      - name: Build UI
+        run: npm run build
+
+      - name: Skill picker ranking
+        run: node scripts/test-skill-filter.ts
+
+      - name: Icons are reproducible
+        run: |
+          node scripts/make-icons.mjs
+          git diff --exit-code -- ui/public || {
+            echo "::error::Generated icons differ from the committed ones. Run: node scripts/make-icons.mjs"
+            exit 1
+          }

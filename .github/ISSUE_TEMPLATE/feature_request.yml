@@ -1,0 +1,42 @@
+name: Feature request
+description: Suggest something Super should do
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Super is deliberately small, and some things are excluded on purpose —
+        it cannot run `node`, `npm`, `python` or your tests, and the tool surface
+        is capped at nine. Those are documented in [`docs/adr/`](../../docs/adr).
+        Proposals to change them are welcome, they just need an argument.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you hitting?
+      description: Describe the situation, not the solution you have in mind.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like it to do?
+    validations:
+      required: true
+
+  - type: textarea
+    id: cost
+    attributes:
+      label: What would it cost?
+      description: >
+        Super is cheap-by-default on purpose. Would this add tokens per turn,
+        break the frozen prompt prefix, add a tool, or need a paid Cloudflare
+        service? An honest answer here makes the proposal stronger, not weaker.
+
+  - type: checkboxes
+    id: adr
+    attributes:
+      label: Existing decisions
+      options:
+        - label: I checked `docs/adr/` and this does not contradict a recorded decision (or I have said which one and why it should change)

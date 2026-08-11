@@ -1,0 +1,49 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // The product is called Super; the Worker script is still "harness" because
+  // renaming a script creates a *new* Worker and orphans its Durable Object
+  // namespaces — every Workspace and Conversation would be lost. Forks should
+  // pick their own name here, and their own D1 database_id below.
+  "name": "harness",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-01",
+
+  // nodejs_compat is required by @cloudflare/computer.
+  // Do NOT add "experimental" (Cloudflare rejects it on deploy) and do NOT add
+  // "enable_ctx_exports" (default-on since 2025-11-17). Both are wrong in the
+  // @cloudflare/computer 0.2.0 README — see ADR-0002.
+  "compatibility_flags": ["nodejs_compat"],
+
+  "workers_dev": true,
+  "observability": { "enabled": true },
+
+  "assets": { "directory": "./web", "binding": "ASSETS" },
+
+  // Preloaded Skills are imported as text, so they stay real SKILL.md files on
+  // disk rather than string literals -- `skill-author` teaches a format the
+  // repo actually uses.
+  "rules": [{ "type": "Text", "globs": ["**/*.md"] }],
+
+  // Dynamic Worker loader — backs the just-bash shell. Workers Paid only.
+  "worker_loaders": [{ "binding": "LOADER" }],
+
+  "durable_objects": {
+    "bindings": [
+      { "name": "WORKSPACE", "class_name": "WorkspaceDO" },
+      { "name": "CONVERSATION", "class_name": "ConversationDO" }
+    ]
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["WorkspaceDO", "ConversationDO"] }
+  ],
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "harness",
+      "database_id": "86cd7d37-14fd-449d-ba95-7a9fbc200600"
+    }
+  ],
+
+  "ai": { "binding": "AI" }
+}

@@ -1,0 +1,590 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Palette in the spirit of Claude: warm paper rather than clinical white, a
+   clay accent instead of a saturated blue, and serif display type against a
+   sans UI. Every colour is defined on bare :root first, then re-declared under
+   dark, so nothing has its only definition inside a media query.
+   --------------------------------------------------------------------------- */
+:root {
+  --paper: #faf9f5;
+  --surface: #ffffff;
+  --panel: #f2f0e9;
+  --edge: #e4e1d7;
+  --edge-strong: #d3cfc2;
+  --ink: #1f1e1d;
+  --ink-soft: #3d3b38;
+  --muted: #73716c;
+  --clay: #c96442;
+  --clay-hover: #b0543a;
+  --clay-soft: #f7ece7;
+  --danger: #b4402c;
+  --ok: #5a7d5a;
+  --shadow: 0 1px 2px rgb(31 30 29 / 0.04), 0 4px 16px rgb(31 30 29 / 0.05);
+
+  --serif: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --sans: ui-sans-serif, -apple-system, "Segoe UI", Inter, system-ui, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #262624;
+    --surface: #30302e;
+    --panel: #1f1e1d;
+    --edge: #3e3e3b;
+    --edge-strong: #4d4d49;
+    --ink: #f0efea;
+    --ink-soft: #d9d7d0;
+    --muted: #a2a09a;
+    --clay: #d97757;
+    --clay-hover: #e08a6d;
+    --clay-soft: #3a2c26;
+    --danger: #e5836d;
+    --ok: #8fae8f;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.2), 0 4px 16px rgb(0 0 0 / 0.22);
+  }
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--clay-soft);
+}
+
+/* Scrollbars that recede rather than announce themselves. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--edge-strong) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--edge-strong);
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: 999px;
+}
+
+/* --- Components -----------------------------------------------------------
+   Named classes rather than long utility strings, so the visual language stays
+   consistent across three panels instead of drifting per component.           */
+
+.display {
+  font-family: var(--serif);
+  letter-spacing: -0.015em;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 0.625rem;
+  border: 1px solid var(--edge);
+  background: var(--surface);
+  color: var(--ink);
+  padding: 0.4rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+}
+.btn:hover:not(:disabled) {
+  background: var(--panel);
+  border-color: var(--edge-strong);
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--clay);
+  border-color: transparent;
+  color: #fff;
+  font-weight: 600;
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--clay-hover);
+  border-color: transparent;
+}
+
+.btn-ghost {
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
+}
+.btn-ghost:hover:not(:disabled) {
+  background: var(--panel);
+  border-color: transparent;
+  color: var(--ink);
+}
+
+.card {
+  border: 1px solid var(--edge);
+  border-radius: 0.875rem;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border-radius: 999px;
+  border: 1px solid var(--edge);
+  padding: 0.15rem 0.6rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.pill-accent {
+  border-color: transparent;
+  background: var(--clay);
+  color: #fff;
+}
+.pill-warn {
+  border-color: transparent;
+  background: color-mix(in srgb, var(--danger) 14%, transparent);
+  color: var(--danger);
+}
+
+.field {
+  width: 100%;
+  border: 1px solid var(--edge);
+  border-radius: 0.625rem;
+  background: var(--surface);
+  color: var(--ink);
+  padding: 0.45rem 0.65rem;
+  font-size: 0.8125rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.field:focus {
+  border-color: var(--clay);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--clay) 16%, transparent);
+}
+
+.label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.mono {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+}
+
+/* Assistant prose gets the serif treatment: it is the thing being read, and it
+   is what makes the interface feel like a document rather than a console. */
+.prose-answer {
+  font-family: var(--serif);
+  font-size: 1.0625rem;
+  line-height: 1.72;
+  color: var(--ink);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* --- Rendered markdown ---------------------------------------------------- */
+
+.md {
+  font-family: var(--serif);
+  font-size: 1.0625rem;
+  line-height: 1.72;
+  color: var(--ink);
+}
+.md > *:first-child { margin-top: 0; }
+.md > *:last-child { margin-bottom: 0; }
+
+.md-p { margin: 0 0 0.95em; }
+
+.md-h {
+  font-family: var(--serif);
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  line-height: 1.3;
+  margin: 1.5em 0 0.5em;
+}
+.md-h1 { font-size: 1.45em; }
+.md-h2 { font-size: 1.25em; }
+.md-h3 { font-size: 1.1em; }
+.md-h4, .md-h5, .md-h6 { font-size: 1em; }
+
+.md-list { margin: 0 0 0.95em; padding-left: 1.35em; }
+.md-ul { list-style: disc; }
+.md-ol { list-style: decimal; }
+.md-list li { margin-bottom: 0.3em; }
+.md-list li::marker { color: var(--muted); }
+
+.md-quote {
+  margin: 0 0 0.95em;
+  padding: 0.1em 0 0.1em 1em;
+  border-left: 2px solid var(--clay);
+  color: var(--ink-soft);
+}
+
+.md-hr {
+  margin: 1.6em 0;
+  border: 0;
+  border-top: 1px solid var(--edge);
+}
+
+.md-a {
+  color: var(--clay);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.md-a:hover { color: var(--clay-hover); }
+
+/* Code drops back to sans/mono: serif code is unreadable. */
+.md-code {
+  font-family: var(--mono);
+  font-size: 0.85em;
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: 0.3rem;
+  padding: 0.08em 0.32em;
+  white-space: nowrap;
+}
+
+.md-pre {
+  position: relative;
+  margin: 0 0 1em;
+  padding: 0.85rem 0.9rem;
+  border: 1px solid var(--edge);
+  border-radius: 0.75rem;
+  background: var(--panel);
+  overflow-x: auto;
+}
+.md-pre code {
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  white-space: pre;
+  color: var(--ink);
+}
+.md-lang {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.6rem;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.md-table-wrap { margin: 0 0 1em; overflow-x: auto; }
+.md-table {
+  border-collapse: collapse;
+  font-family: var(--sans);
+  font-size: 0.875rem;
+  width: 100%;
+}
+.md-table th,
+.md-table td {
+  border: 1px solid var(--edge);
+  padding: 0.4rem 0.65rem;
+  text-align: left;
+  vertical-align: top;
+}
+.md-table th {
+  background: var(--panel);
+  font-weight: 600;
+}
+
+.drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: flex-end;
+  background: rgb(31 30 29 / 0.32);
+  backdrop-filter: blur(2px);
+  animation: fade 0.16s ease;
+}
+.drawer-body {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  max-width: 44rem;
+  flex-direction: column;
+  background: var(--paper);
+  border-left: 1px solid var(--edge);
+  animation: slide 0.2s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+@keyframes fade {
+  from { opacity: 0; }
+}
+@keyframes slide {
+  from { transform: translateX(2rem); opacity: 0; }
+}
+
+/* --- Safe areas -----------------------------------------------------------
+   Installed as a PWA the page runs fullscreen under a translucent status bar
+   (viewport-fit=cover), so anything at the top of the viewport sits beneath the
+   clock and the notch — which made the drawer Close buttons unclickable on
+   iOS. Insets are applied to every element that touches an edge.             */
+
+.app-header {
+  padding-top: max(0.75rem, env(safe-area-inset-top));
+  padding-left: max(1.25rem, env(safe-area-inset-left));
+  padding-right: max(1.25rem, env(safe-area-inset-right));
+}
+
+.drawer-body > header {
+  padding-top: max(0.875rem, calc(env(safe-area-inset-top) + 0.25rem));
+  padding-right: max(1.25rem, env(safe-area-inset-right));
+}
+
+.drawer-body > div {
+  padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+}
+
+.composer-footer {
+  padding-bottom: max(1.5rem, calc(env(safe-area-inset-bottom) + 0.5rem));
+  padding-left: max(1.25rem, env(safe-area-inset-left));
+  padding-right: max(1.25rem, env(safe-area-inset-right));
+}
+
+details > summary {
+  list-style: none;
+  cursor: pointer;
+}
+details > summary::-webkit-details-marker {
+  display: none;
+}
+
+/* --- Artifacts ------------------------------------------------------------- */
+
+.artifacts {
+  margin-top: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.artifact {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid var(--edge);
+  border-radius: 0.7rem;
+  background: var(--surface);
+  padding: 0.35rem 0.5rem 0.35rem 0.7rem;
+}
+
+.artifact-icon { color: var(--clay); font-size: 0.95rem; line-height: 1; }
+.artifact-name {
+  font-size: 0.8125rem;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 55%;
+}
+
+.preview-frame {
+  width: 100%;
+  height: 100%;
+  min-height: 70vh;
+  border: 0;
+  background: #fff;
+}
+
+/* --- The "/" skill picker -------------------------------------------------- */
+
+.slash-menu {
+  position: absolute;
+  bottom: calc(100% + 0.5rem);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  max-height: 19rem;
+  overflow-y: auto;
+  border: 1px solid var(--edge);
+  border-radius: 0.875rem;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding: 0.3rem;
+  animation: slash-in 0.12s ease;
+}
+@keyframes slash-in {
+  from { opacity: 0; transform: translateY(4px); }
+}
+
+.slash-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  border-radius: 0.6rem;
+  padding: 0.45rem 0.6rem;
+  cursor: pointer;
+  color: var(--ink);
+}
+.slash-item.is-active { background: var(--clay-soft); }
+
+.slash-name {
+  display: block;
+  font-weight: 600;
+  color: var(--clay);
+  font-size: 0.8125rem;
+}
+.slash-desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--muted);
+  margin-top: 0.1rem;
+}
+
+.slash-empty {
+  padding: 0.65rem 0.7rem;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+.slash-hint {
+  border-top: 1px solid var(--edge);
+  margin-top: 0.3rem;
+  padding: 0.4rem 0.6rem 0.15rem;
+  font-size: 0.6875rem;
+  color: var(--muted);
+}
+.slash-hint kbd {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  border: 1px solid var(--edge);
+  border-radius: 0.25rem;
+  padding: 0.02rem 0.25rem;
+  margin-right: 0.1rem;
+}
+
+/* --- The working companion ------------------------------------------------ */
+
+.working {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.15rem 0;
+  color: var(--muted);
+  font-size: 0.9375rem;
+}
+
+.pet { flex: none; overflow: visible; }
+.pet-body { fill: var(--clay); }
+.pet-eye { fill: #fff; }
+.pet-cheek { fill: #fff; opacity: 0.22; }
+.pet-smile { fill: none; stroke: #fff; stroke-width: 1.4; stroke-linecap: round; opacity: 0.75; }
+.pet-antenna { fill: none; stroke: var(--clay); stroke-width: 1.6; stroke-linecap: round; }
+.pet-antenna-tip { fill: var(--clay); }
+.pet-shadow { fill: var(--ink); opacity: 0.1; animation: pet-shadow 1.25s ease-in-out infinite; }
+
+/* One shared period keeps hop, squash, lean and shadow in phase; drifting
+   apart is what makes cheap character animation look broken. */
+.pet-hop { animation: pet-hop 1.25s ease-in-out infinite; transform-origin: 24px 31px; }
+.pet-squash { animation: pet-squash 1.25s ease-in-out infinite; transform-origin: 24px 31px; }
+.pet-lean { animation: pet-lean 1.25s ease-in-out infinite; transform-origin: 24px 31px; }
+/* Long pause, quick close: a blink you notice is a blink that is too slow. */
+.pet-blink { animation: pet-blink 4.3s ease-in-out infinite; transform-origin: 24px 17.5px; }
+
+/* Running a tool: same choreography, visibly busier. */
+.pet.is-busy .pet-hop,
+.pet.is-busy .pet-squash,
+.pet.is-busy .pet-lean,
+.pet.is-busy .pet-shadow { animation-duration: 0.72s; }
+
+@keyframes pet-hop {
+  0%, 100% { transform: translateY(0); }
+  28% { transform: translateY(-8px); }
+  52% { transform: translateY(0); }
+  62% { transform: translateY(-1.5px); }
+  72% { transform: translateY(0); }
+}
+@keyframes pet-squash {
+  0%, 100% { transform: scale(1, 1); }
+  14% { transform: scale(1.14, 0.86); }
+  30% { transform: scale(0.93, 1.08); }
+  55% { transform: scale(1.1, 0.9); }
+  74% { transform: scale(0.98, 1.02); }
+  88% { transform: scale(1, 1); }
+}
+@keyframes pet-lean {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-7deg); }
+  55% { transform: rotate(6deg); }
+  80% { transform: rotate(-2deg); }
+}
+@keyframes pet-shadow {
+  0%, 100% { transform: scale(1); opacity: 0.1; }
+  28% { transform: scale(0.66); opacity: 0.045; }
+}
+@keyframes pet-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+
+.working-text { display: inline-flex; align-items: baseline; gap: 0.15rem; }
+.working-label { font-family: var(--serif); font-style: italic; }
+
+.working-dots { display: inline-flex; gap: 2px; padding-bottom: 0.15em; }
+.working-dots i {
+  width: 3px;
+  height: 3px;
+  border-radius: 999px;
+  background: currentColor;
+  animation: dot 1.2s ease-in-out infinite;
+}
+.working-dots i:nth-child(2) { animation-delay: 0.15s; }
+.working-dots i:nth-child(3) { animation-delay: 0.3s; }
+@keyframes dot {
+  0%, 60%, 100% { opacity: 0.25; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-2px); }
+}
+
+.working-time { opacity: 0.65; }
+
+/* Respect a stated preference for stillness: keep the information, drop the
+   motion. An animation someone finds unpleasant is not engaging. */
+@media (prefers-reduced-motion: reduce) {
+  .pet-hop, .pet-squash, .pet-lean, .pet-shadow, .pet-blink, .working-dots i, .breathe {
+    animation: none;
+  }
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+.breathe {
+  animation: breathe 1.6s ease-in-out infinite;
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "harness-spike-computer",
+  "main": "index.ts",
+  "compatibility_date": "2026-08-01",
+  // enable_ctx_exports has no default-on date — it must be set explicitly.
+  // WorkerShellBackend calls ctx.exports.WorkspaceServiceProxy({ props }) to
+  // give the Dynamic Worker a loopback into this Workspace; without the flag,
+  // every exec() throws "ctx.exports.WorkspaceServiceProxy is not a function".
+  "compatibility_flags": ["nodejs_compat", "enable_ctx_exports"],
+  "workers_dev": true,
+  "observability": { "enabled": true },
+
+  // Worker shell runs just-bash inside a Dynamic Worker, which is what
+  // this binding provides. Requires the Workers Paid plan.
+  "worker_loaders": [{ "binding": "LOADER" }],
+
+  "durable_objects": {
+    "bindings": [{ "name": "Agent", "class_name": "Agent" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Agent"] }]
+}

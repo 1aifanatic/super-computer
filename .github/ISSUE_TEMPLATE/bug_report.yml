@@ -1,0 +1,64 @@
+name: Bug report
+description: Something behaved differently from how it should
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. The turn footer (tokens, cost, stop reason) is usually
+        enough to diagnose a problem, so please include it if you have it.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you ask, and what did you get?
+      placeholder: |
+        I sent "/refactor rename getUser to fetchUser" and the turn ended with
+        "stopped: kept repeating the same grep call".
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected instead
+    validations:
+      required: true
+
+  - type: input
+    id: model
+    attributes:
+      label: Model profile
+      description: Which model was selected, and was Council on?
+      placeholder: MiniMax M2.7, council off
+    validations:
+      required: true
+
+  - type: textarea
+    id: footer
+    attributes:
+      label: Turn footer
+      description: >
+        The grey line under the answer. A `cached` count of zero on a long
+        conversation is itself a strong clue.
+      placeholder: minimax-m2.7 · 2029 in (886 cached) · 185 out · $0.00062 · 2 tools · 7.2s
+      render: text
+
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Where
+      options:
+        - Browser
+        - Installed PWA (iOS)
+        - Installed PWA (Android)
+        - API directly (curl/script)
+    validations:
+      required: true
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: Console errors, the skill involved, whether it reproduces every time.

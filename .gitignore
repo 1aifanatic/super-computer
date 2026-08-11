@@ -1,0 +1,18 @@
+node_modules/
+.wrangler/
+dist/
+
+# Build output. `npm run deploy` regenerates it before every deploy, so it is
+# not worth versioning a bundle that changes on every build.
+web/
+
+# Never commit credentials.
+.dev.vars
+.dev.vars.*
+.env
+.env.*
+*.secrets.json
+
+# Personal working state: local paths, account ids, deploy notes. Kept on disk
+# for resuming work, deliberately not published.
+STATE.md
