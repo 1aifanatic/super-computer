@@ -61,6 +61,14 @@ export interface TraceEntry {
   tool: string;
   input: string;
   output: string;
+  /**
+   * The file a write touched, carried explicitly.
+   *
+   * `input` is truncated to 300 characters for display, so parsing the path
+   * back out of it fails precisely when the file is large — which is when the
+   * Operator most wants to download it. Never derive the path from `input`.
+   */
+  path?: string;
 }
 
 export interface TurnSummary {
@@ -80,8 +88,8 @@ export interface TurnSummary {
 export type TurnEvent =
   | { type: "turn_start"; turnId: string; seq: number }
   | { type: "iteration"; n: number }
-  | { type: "tool_start"; tool: string; input: string }
-  | { type: "tool_end"; tool: string; output: string }
+  | { type: "tool_start"; tool: string; input: string; path?: string }
+  | { type: "tool_end"; tool: string; output: string; path?: string }
   | { type: "turn_end"; turn: TurnSummary }
   | { type: "error"; message: string }
   /** Sent once per connection, after any replay, so the client knows the

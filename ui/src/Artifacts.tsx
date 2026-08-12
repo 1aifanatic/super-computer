@@ -91,21 +91,37 @@ export default function Artifacts({ files, workspaceId }: { files: Artifact[]; w
   );
 }
 
-/** Paths a Turn wrote, newest last, de-duplicated. */
-export function artifactsFromTrace(trace: { tool: string; input: string }[] | undefined): Artifact[] {
+/**
+ * Paths a Turn wrote, de-duplicated, in the order they were written.
+ *
+ * Uses the `path` the server carries on the event. It used to parse `input`,
+ * which is truncated to 300 characters for display — so a large file, the one
+ * most worth downloading, produced invalid JSON and silently no card at all.
+ * Parsing remains only as a fallback for short calls from older sessions.
+ */
+export function artifactsFromTrace(
+  trace: { tool: string; input: string; path?: string }[] | undefined,
+): Artifact[] {
   if (!trace?.length) return [];
   const seen = new Set<string>();
   const out: Artifact[] = [];
+
   for (const t of trace) {
     if (t.tool !== "write_file" && t.tool !== "edit_file") continue;
-    try {
-      const path = JSON.parse(t.input)?.path;
-      if (typeof path === "string" && !seen.has(path)) {
-        seen.add(path);
-        out.push({ path });
+
+    let path = t.path;
+    if (!path) {
+      try {
+        const parsed = JSON.parse(t.input)?.path;
+        if (typeof parsed === "string") path = parsed;
+      } catch {
+        // Truncated input and no explicit path: nothing reliable to offer.
       }
-    } catch {
-      // Truncated or malformed input: nothing to offer, and not worth a crash.
+    }
+
+    if (path && !seen.has(path)) {
+      seen.add(path);
+      out.push({ path });
     }
   }
   return out;

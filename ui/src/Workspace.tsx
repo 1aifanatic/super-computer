@@ -18,6 +18,9 @@ export default function Workspace({ onClose }: { onClose: () => void }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [note, setNote] = useState<{ kind: "error" | "ok"; text: string } | null>(null);
   const [output, setOutput] = useState<string>("");
+  // null = not looked yet, so the drawer does not pay for a filesystem walk
+  // every time it opens.
+  const [files, setFiles] = useState<string[] | null>(null);
 
   // Auth rides on the session cookie, sent automatically on same-origin fetch.
   const headers = { "content-type": "application/json" };
@@ -34,6 +37,16 @@ export default function Workspace({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     load();
   }, [load]);
+
+  async function loadFiles() {
+    setBusy("files");
+    try {
+      const res = await fetch("/api/workspace/files?workspaceId=default&path=/workspace", { headers });
+      if (res.ok) setFiles((await res.json()).files ?? []);
+    } finally {
+      setBusy(null);
+    }
+  }
 
   async function git(argv: string[]) {
     setBusy(argv[0]);
@@ -182,6 +195,35 @@ export default function Workspace({ onClose }: { onClose: () => void }) {
               )}
             </div>
           )}
+
+          <div className="mb-5">
+            <div className="label">Files</div>
+            {files === null ? (
+              <button className="btn" onClick={loadFiles}>Browse workspace</button>
+            ) : files.length === 0 ? (
+              <p className="text-sm text-[var(--muted)]">No files yet.</p>
+            ) : (
+              <>
+                <div className="artifacts">
+                  {files.map((f) => (
+                    <div key={f} className="artifact">
+                      <span className="artifact-icon">{/\.(html?|svg)$/i.test(f) ? "◫" : "▤"}</span>
+                      <span className="artifact-name mono" title={f}>{f.replace(/^\/workspace\//, "")}</span>
+                      <div className="flex-1" />
+                      <a
+                        className="btn btn-ghost"
+                        href={`/api/workspace/file?workspaceId=default&path=${encodeURIComponent(f)}&download=1`}
+                        download
+                      >
+                        download
+                      </a>
+                    </div>
+                  ))}
+                </div>
+                <button className="btn mt-2" onClick={loadFiles}>Refresh</button>
+              </>
+            )}
+          </div>
 
           {output && (
             <div>

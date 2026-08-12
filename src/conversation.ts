@@ -329,7 +329,13 @@ export class ConversationDO extends DurableObject<Env> {
         if (state.recentCalls.length > CAPS.identicalCalls * 2) state.recentCalls.shift();
 
         const input = JSON.stringify(call.arguments).slice(0, 300);
-        await this.emit({ type: "tool_start", tool: call.name, input });
+        // Carried alongside the truncated `input` so the UI can offer the file
+        // for download without having to parse a string that may be cut off.
+        const path =
+          (call.name === "write_file" || call.name === "edit_file") && typeof call.arguments?.path === "string"
+            ? (call.arguments.path as string)
+            : undefined;
+        await this.emit({ type: "tool_start", tool: call.name, input, path });
 
         // Repetition used to be fatal on sight. Killing a Turn is a worse
         // outcome than telling the model it is stuck, so the first repeat is
@@ -346,10 +352,18 @@ export class ConversationDO extends DurableObject<Env> {
         state.toolCalls += 1;
         state.lastProgressAt = Date.now();
 
-        await this.emit({ type: "tool_end", tool: call.name, output: output.slice(0, 2000) });
+        // Only surface a file that was actually written. Offering a download
+        // for a call that errored would hand the Operator a broken link.
+        const wrote = path && !output.startsWith("Error:");
+        await this.emit({
+          type: "tool_end",
+          tool: call.name,
+          output: output.slice(0, 2000),
+          path: wrote ? path : undefined,
+        });
         // Kept short: this rides in the response and in DO storage, and a
         // 25-iteration Turn would otherwise carry a lot of dead weight.
-        state.trace.push({ tool: call.name, input, output: output.slice(0, 400) });
+        state.trace.push({ tool: call.name, input, output: output.slice(0, 400), path: wrote ? path : undefined });
         state.messages.push({ role: "tool", tool_call_id: call.id, content: output });
       }
 

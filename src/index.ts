@@ -325,6 +325,38 @@ export default {
         }
       }
 
+      /**
+       * Lists files in the Workspace so anything the agent ever produced stays
+       * reachable. The per-message artifact cards are built from live turn
+       * events, which a page reload does not have — without this, work created
+       * yesterday would be stranded inside a Durable Object.
+       */
+      if (url.pathname === "/api/workspace/files" && request.method === "GET") {
+        const workspaceId = url.searchParams.get("workspaceId") || "default";
+        const root = url.searchParams.get("path") || "/workspace";
+
+        const stub = env.WORKSPACE.get(env.WORKSPACE.idFromName(workspaceId));
+        using ws: any = await getWorkspace(stub as any);
+
+        try {
+          // `find` is cheaper than walking readdir over RPC, and .git would
+          // otherwise bury real work under thousands of object files.
+          using run: any = await ws.runtime.exec(
+            `find ${root} -type f -not -path '*/.git/*' | head -400`,
+            { encoding: "utf8" },
+          );
+          const { stdout } = await run.result();
+          const paths = String(stdout ?? "")
+            .split("\n")
+            .map((s) => s.trim())
+            .filter(Boolean)
+            .sort();
+          return json({ root, count: paths.length, files: paths });
+        } catch (e: any) {
+          return json({ root, count: 0, files: [], error: String(e?.message ?? e).slice(0, 200) });
+        }
+      }
+
       if (url.pathname === "/api/workspace/binding" && request.method === "GET") {
         const workspaceId = url.searchParams.get("workspaceId") || "default";
         const row = await env.DB.prepare(`SELECT * FROM workspace_bindings WHERE workspace_id = ?`)

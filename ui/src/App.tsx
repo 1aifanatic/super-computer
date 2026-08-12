@@ -10,8 +10,8 @@ import Artifacts, { artifactsFromTrace } from "./Artifacts";
 type TurnEvent =
   | { type: "turn_start"; turnId: string; seq: number }
   | { type: "iteration"; n: number }
-  | { type: "tool_start"; tool: string; input: string }
-  | { type: "tool_end"; tool: string; output: string }
+  | { type: "tool_start"; tool: string; input: string; path?: string }
+  | { type: "tool_end"; tool: string; output: string; path?: string }
   | { type: "turn_end"; turn: TurnSummary }
   | { type: "error"; message: string }
   | { type: "synced"; running: boolean }
@@ -41,6 +41,8 @@ interface ToolRun {
   tool: string;
   input: string;
   output?: string;
+  /** Set by the server for writes. Never derived from the truncated `input`. */
+  path?: string;
 }
 
 interface Entry {
@@ -184,12 +186,16 @@ export default function App() {
             if (!last || last.role !== "assistant" || last.summary) next.push({ role: "assistant", text: "", tools: [] });
             return next;
           case "tool_start":
-            if (last?.role === "assistant") last.tools = [...(last.tools ?? []), { tool: ev.tool, input: ev.input }];
+            if (last?.role === "assistant")
+              last.tools = [...(last.tools ?? []), { tool: ev.tool, input: ev.input, path: ev.path }];
             return next;
           case "tool_end":
             if (last?.role === "assistant" && last.tools?.length) {
               const t = last.tools[last.tools.length - 1];
               if (!t.output) t.output = ev.output;
+              // tool_end carries the path only when the write actually
+              // succeeded, so it supersedes whatever tool_start guessed.
+              t.path = ev.path;
             }
             return next;
           case "council_start":
